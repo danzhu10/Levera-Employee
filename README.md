@@ -76,14 +76,6 @@ src/
 
 Base URL: `https://65264556917d673fd76bec6f.mockapi.io/api/v1/employee`
 
-> **Catatan:** MockAPI ini dipakai bersama kandidat lain. Data bisa berubah sewaktu-waktu. Aplikasi tidak hardcode ID atau jumlah data.
-
-## Yang Belum Dikerjakan
-
-- Unit test (Jest + React Testing Library)
-- Deploy ke Vercel/Netlify (live demo)
-- Optimistic UI update saat edit/delete
-
 ## Tech Stack
 
 - React 19 + Vite
