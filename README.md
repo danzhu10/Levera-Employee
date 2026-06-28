@@ -1,66 +1,92 @@
 # Employee Management — Levera Technical Test
 
-Aplikasi web sederhana untuk mengelola data karyawan (CRUD) dengan React, terhubung ke MockAPI.
+A simple web application for managing employee data (CRUD) with React, connected to MockAPI.
 
-## Cara Install & Menjalankan
+## Getting Started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Buka [http://localhost:5173](http://localhost:5173) di browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Build production:
+Production build:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Fitur
+Lint:
 
-- **Daftar karyawan** — tabel dengan nama, posisi, alamat, tanggal dibuat
-- **Search & filter** — pencarian nama (debounced 300ms) + filter posisi
-- **Detail karyawan** — halaman detail lengkap
-- **Tambah / edit karyawan** — form dengan validasi
-- **Hapus karyawan** — konfirmasi modal sebelum menghapus
-- **Loading & error state** — setiap operasi API menampilkan feedback yang jelas
-- **Pagination** — navigasi halaman (server-side atau client-side saat filter posisi aktif)
+```bash
+npm run lint
+```
 
-## Keputusan Teknis
+## Deployment
+
+Every push to the `main` branch automatically deploys the app to a DigitalOcean Droplet via GitHub Actions ([`.github/workflows/main.yml`](.github/workflows/main.yml)).
+
+```mermaid
+flowchart LR
+    push["Push to main"] --> ci["GitHub Actions: npm ci + build"]
+    ci --> scp["SCP dist/ to Droplet"]
+    scp --> nginx["Nginx serves /var/www/levera/dist"]
+```
+
+**Pipeline:**
+
+1. **Trigger** — push to `main`
+2. **Build** — GitHub Actions runs on `ubuntu-latest` with Node 20: `npm ci` then `npm run build`
+3. **Deploy** — `appleboy/scp-action` uploads `dist/*` to `/var/www/levera/dist` on the Droplet via SSH
+4. **Serve** — Nginx serves the static files from `/var/www/levera/dist` (with SPA fallback for React Router)
+
+**Required GitHub Secrets:** `SSH_HOST`, `SSH_USER`, `SSH_KEY`
+
+## Features
+
+- **Employee list** — table with name, position, address, and created date
+- **Search & filter** — name search (debounced 300ms) + position filter
+- **Employee detail** — full detail page
+- **Create / edit employee** — form with validation
+- **Delete employee** — confirmation modal before deletion
+- **Loading & error states** — clear feedback for every API operation
+- **Pagination** — page navigation (server-side or client-side when position filter is active)
+
+## Technical Decisions
 
 ### Vite + React + TypeScript
 
-Vite dipilih karena startup dev server yang cepat dan dukungan TypeScript bawaan. TypeScript memberikan type safety untuk model data employee dan response API.
+Vite was chosen for its fast dev server startup and built-in TypeScript support. TypeScript provides type safety for employee data models and API responses.
 
-### TanStack Query (bukan Redux/Zustand)
+### TanStack Query (not Redux/Zustand)
 
-Aplikasi ini hampir seluruhnya berurusan dengan **server state** (fetch, cache, invalidation setelah mutation). TanStack Query menangani loading/error/retry/cache invalidation tanpa boilerplate Redux. Tidak ada global client state kompleks yang membutuhkan state manager terpisah.
+This app is almost entirely concerned with **server state** (fetch, cache, invalidation after mutations). TanStack Query handles loading/error/retry/cache invalidation without Redux boilerplate. There is no complex global client state that requires a separate state manager.
 
-### fetch (bukan axios)
+### fetch (not axios)
 
-MockAPI cukup sederhana; `fetch` native sudah memenuhi kebutuhan tanpa dependency tambahan. Error handling dipusatkan di `src/api/employeeApi.ts`.
+MockAPI is simple enough; native `fetch` meets the requirements without an extra dependency. Error handling is centralized in `src/api/employeeApi.ts`.
 
 ### react-hook-form + zod
 
-Validasi form deklaratif dengan pesan error dalam Bahasa Indonesia. Schema zod bisa di-reuse dan type-safe.
+Declarative form validation with error messages in Indonesian. The zod schema is reusable and type-safe.
 
 ### Tailwind CSS
 
-Utility-first CSS untuk layout responsif dan komponen UI dengan cepat, tanpa file CSS terpisah yang besar.
+Utility-first CSS for responsive layouts and UI components quickly, without large separate CSS files.
 
-### Search & filter posisi (hybrid)
+### Search & position filter (hybrid)
 
-MockAPI mendukung `?search=` dan `?page=&limit=`, tetapi **tidak** mendukung filter posisi via query param.
+MockAPI supports `?search=` and `?page=&limit=`, but does **not** support position filtering via query param.
 
-- **Search nama**: server-side via `?search=`
-- **Filter posisi**: fetch hingga 100 record, filter client-side, lalu paginasi client-side
-- **Tanpa filter posisi**: paginasi server-side (`page=1&limit=10`)
+- **Name search**: server-side via `?search=`
+- **Position filter**: fetch up to 100 records, filter client-side, then paginate client-side
+- **Without position filter**: server-side pagination (`page=1&limit=10`)
 
-Dropdown posisi diisi dari query terpisah yang mengambil unique values dari data API.
+The position dropdown is populated from a separate query that fetches unique values from the API data.
 
-## Struktur Project
+## Project Structure
 
 ```
 src/
